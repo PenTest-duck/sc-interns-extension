@@ -1,15 +1,8 @@
-module github.com/georgechieng-sc/interns-2022
+module github.com/pentest-duck/sc-interns-extension
 
-go 1.19
+go 1.21.4
 
 require (
-	github.com/gofrs/uuid v4.3.0+incompatible
+	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/lucasepe/codename v0.2.0
-	github.com/stretchr/testify v1.8.0
-)
-
-require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

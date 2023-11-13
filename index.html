@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>FolderSearch</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="/assets/style.css">
+    </head>
+
+    <body>
+        <h1>FolderSearch</h1>
+
+        <div class="search-form">
+        <form action="/" method="GET">
+            <label for="org-id">Organisation UUID <span style="color: grey">(default c1556e17-b7c0-45a3-a6ae-9546248fb17a)</span></label>
+            <input type="text" id="org-id" name="org-id" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" value="{{ if ne .Params.OrgID .NilUUID }}{{ .Params.OrgID }}{{ end }}" pattern="^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$">
+            <br>
+
+            <input type="radio" id="all" name="status" value="all" {{ if eq .Params.Status "all" }} checked {{ end }}>
+            <label for="all">All</label>
+            <input type="radio" id="existing" name="status" value="existing" {{ if eq .Params.Status "existing" }} checked {{ end }}>
+            <label for="all">Only existing</label>
+            <input type="radio" id="deleted" name="status" value="deleted" {{ if eq .Params.Status "deleted" }} checked {{ end }}>
+            <label for="all">Only deleted</label>
+            <br>
+
+            <label for="size">Folders per page <span style="color: grey">(default 10)</span>:</label>
+            <input type="text" id="size" name="size" placeholder="5-100" value="{{ if ne .Params.PageSize 10 }}{{ .Params.PageSize }}{{ end }}">
+
+            <input type="hidden" id="page" name="page" value="1">
+
+            <br>
+            <input type="submit" id="search" value="Search">
+        </form>
+        </div>
+
+        <p>Folders found: {{ .TotalCount }}</p>
+
+        {{ if eq .TotalCount 0 }}
+        <p id="no-folders">Sorry, no folders found.</p>
+        {{ else }}
+        <div class="page-nav">
+            {{ if gt .CurrentPage 1 }}
+            <span class="page-nav-element"><a href="/?org-id={{ .Params.OrgID }}&status={{ .Params.Status }}&size={{ .Params.PageSize }}&page={{ .FirstPage }}">&laquo;</a></span>
+            <span class="page-nav-element"><a href="/?org-id={{ .Params.OrgID }}&status={{ .Params.Status }}&size={{ .Params.PageSize }}&page={{ .PreviousPage }}">←</a></span>
+            {{ else }}
+            <span class="page-nav-element">&laquo;</span>
+            <span class="page-nav-element">←</span>
+            {{ end }}
+
+            <span class="page-nav-element">{{ .CurrentPage }}</span>
+
+            {{ if lt .CurrentPage .LastPage }}
+            <span class="page-nav-element"><a href="/?org-id={{ .Params.OrgID }}&status={{ .Params.Status }}&size={{ .Params.PageSize }}&page={{ .NextPage }}">→</a></span>
+            <span class="page-nav-element"><a href="/?org-id={{ .Params.OrgID }}&status={{ .Params.Status }}&size={{ .Params.PageSize }}&page={{ .LastPage }}">&raquo;</a></span>
+            {{ else }}
+            <span class="page-nav-element">→</span>
+            <span class="page-nav-element">&raquo;</span>
+            {{ end }}
+        </div>
+
+        <table>
+            <tr>
+                <th>#</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Organisation ID</th>
+                <th>Status</th>
+            </tr>
+
+            {{ range .Folders }}
+            <tr>
+                <td>{{ .Number }}</td>
+                <td>{{ .Id }}</td>
+                <td>{{ .Name }}</td>
+                <td>{{ .OrgId }}</td>
+                <td style="text-align: center">
+                    {{ if .Deleted }}
+                        <i class="fa fa-trash-o" style="color: red"></i>
+                    {{ else }}
+                        <i class="fa fa-check" style="color: green"></i>
+                    {{ end }}
+                </td>
+            </tr>
+            {{ end }}
+        </table>
+
+        <div class="page-nav">
+            {{ if gt .CurrentPage 1 }}
+            <span class="page-nav-element"><a href="/?org-id={{ .Params.OrgID }}&status={{ .Params.Status }}&size={{ .Params.PageSize }}&page={{ .FirstPage }}">&laquo;</a></span>
+            <span class="page-nav-element"><a href="/?org-id={{ .Params.OrgID }}&status={{ .Params.Status }}&size={{ .Params.PageSize }}&page={{ .PreviousPage }}">←</a></span>
+            {{ else }}
+            <span class="page-nav-element">&laquo;</span>
+            <span class="page-nav-element">←</span>
+            {{ end }}
+
+            <span class="page-nav-element">{{ .CurrentPage }}</span>
+
+            {{ if lt .CurrentPage .LastPage }}
+            <span class="page-nav-element"><a href="/?org-id={{ .Params.OrgID }}&status={{ .Params.Status }}&size={{ .Params.PageSize }}&page={{ .NextPage }}">→</a></span>
+            <span class="page-nav-element"><a href="/?org-id={{ .Params.OrgID }}&status={{ .Params.Status }}&size={{ .Params.PageSize }}&page={{ .LastPage }}">&raquo;</a></span>
+            {{ else }}
+            <span class="page-nav-element">→</span>
+            <span class="page-nav-element">&raquo;</span>
+            {{ end }}
+        </div>
+        {{ end }}
+
+        <footer>
+            <p>Created by Chris Yoo for the <a href="https://safetyculture.com/">SafetyCulture</a> Interns Take-Home Task 2023.</p>
+            <p>Source code available at: <a>https://github.com/PenTest-duck/sc-interns-extension</a>.</p>
+        </footer>
+    </body>
+</html>

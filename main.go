@@ -2,68 +2,26 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 
-	"github.com/georgechieng-sc/interns-2022/folders"
-	"github.com/gofrs/uuid"
+	"github.com/pentest-duck/sc-interns-extension/handlers"
 )
 
 func main() {
-	var orgID string
-	var paginate string
+	const port = "8080"
 
-	// ADDED: allow for arbitrary OrgID input from command line
-	fmt.Print("OrgID to search for (leave blank for default): ")
-	fmt.Scanf("%v", &orgID)
+	// Set up HTTP multiplexer
+	mux := http.NewServeMux()
 
-	// Substitute default OrgID
-	if orgID == "" {
-		orgID = folders.DefaultOrgID
-	}
+	fmt.Println("Server started on port", port)
 
-	// Prepares a request containing the UUID of organisation to get folders for
-	req := &folders.FetchFolderRequest{
-		OrgID: uuid.FromStringOrNil(orgID),
-	}
+	// Serve CSS as static file
+	fs := http.FileServer(http.Dir("assets"))
+	mux.Handle("/assets/", http.StripPrefix("/assets/", fs))
 
-	// ADDED: ask whether to paginate result
-	fmt.Print("Paginate result? (y/N): ")
-	fmt.Scanf("%v", &paginate)
+	// Set up handler for idnex
+	mux.HandleFunc("/", handlers.IndexHandler)
 
-	// Fetches slice of folders with the requested OrgID
-	res, err := folders.GetAllFolders(req)
-
-	// Display error (if any)
-	if err != nil {
-		fmt.Printf("%v\n", err)
-		return
-	}
-
-	if paginate == "y" || paginate == "Y" {
-		pageSize := folders.DefaultPagesize
-		pageNum := 1
-
-		// Get size of each page until it is at least 1
-		fmt.Print("Page size (leave blank for default): ")
-		fmt.Scanf("%d", &pageSize)
-
-		for pageSize < 1 {
-			fmt.Println("Page size must be at least 1")
-
-			fmt.Print("Page size (leave blank for default): ")
-			fmt.Scanf("%d", &pageSize)
-		}
-
-		// Immediately print first page, then ask to print specified pages
-		for pageNum != 0 {
-			page := folders.GetPage(res, pageNum, pageSize)
-			folders.PrettyPrint(page)
-
-			fmt.Print("Page to print (0 to exit): ")
-			fmt.Scanf("%d", &pageNum) // If non-digit entered, last stored value of pageNum used
-		}
-
-	} else {
-		// If no pagination, just prettify and print all returned folders
-		folders.PrettyPrint(res)
-	}
+	// Start web server
+	http.ListenAndServe(":"+port, mux)
 }

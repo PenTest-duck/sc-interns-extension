@@ -1,0 +1,42 @@
+body {
+    padding: 5%;
+    background-color: rgb(255, 255, 240);
+}
+
+h1 {
+    text-align: center;
+    color: rgb(0, 0, 153);
+}
+
+footer {
+    text-align: center;
+}
+
+#org-id {
+    max-width: 400px;
+}
+
+#size {
+    max-width: 100px;
+    max-height: 50px;
+}
+
+#search {
+    max-width: 200px;
+}
+
+.page-nav {
+    text-align: center;
+}
+
+.search-form {
+    text-align: center;
+}
+
+#no-folders {
+    text-align: center;
+}
+
+.page-nav-element {
+    font-size: 30px;
+}

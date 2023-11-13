@@ -25,8 +25,11 @@ const MinDataSetSize = 0
 const MaxDataSetSize = 1000000
 
 const DefaultPagesize = 10
+const MinFoldersPerPage = 5
+const MaxFoldersPerPage = 100
 
 type Folder struct {
+	Number int
 	// A unique identifier for the folder, must be a valid UUID.
 	// For example: '00001d65-d336-485a-8331-7b53f37e8f51'
 	Id uuid.UUID `json:"id"`
@@ -104,7 +107,8 @@ func GetJSONData(JSONFileName string) ([]*Folder, error) {
 	if err != nil {
 		return nil, err
 	}
-	folders := []*Folder{}
+
+	var folders []*Folder
 	json.Unmarshal(jsonByte, &folders)
 	return folders, nil
 }

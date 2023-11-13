@@ -5,33 +5,15 @@ import (
 )
 
 // Return all folders with the specified OrgID as a struct
-func GetAllFolders(req *FetchFolderRequest) (*FetchFolderResponse, error) {
-
-	// Unused variable declaration removed
+func GetFilteredFolders(req *FetchFolderRequest) (*FetchFolderResponse, error) {
 
 	// Fetch all folders with the requested OrgID
-	foldersOfOrg, err := FetchAllFoldersByOrgID(req.OrgID, req.DataSet)
+	foldersOfOrg, err := FetchAllFoldersByParams(req.OrgID, req.Status) //, req.DataSet)
 
 	// Return immediately on error
 	if err != nil {
 		return nil, err
 	}
-
-	/*
-		Section removed as &v1 references the address of v1 which remains constant as it is used in the loop
-		This means that all the elements in fp are dereferenced to whatever the value of v1 is at the time
-		When the loop finishes, the value of v1 is the last folder in foldersOfOrg, so the program will output the same folder repetitively
-
-		for _, v := range foldersOfOrg {
-			folders = append(folders, *v)
-		}
-
-		var fp []*Folder
-
-		for _, v1 := range folders {
-			fp = append(fp, &v1)            // Logic error: &v1 is the same for all folders
-		}
-	*/
 
 	// Find length of foldersOfOrg
 	count := len(foldersOfOrg)
@@ -43,25 +25,50 @@ func GetAllFolders(req *FetchFolderRequest) (*FetchFolderResponse, error) {
 }
 
 // Fetch all folders with the specified OrgID
-func FetchAllFoldersByOrgID(orgID uuid.UUID, dataSet []*Folder) ([]*Folder, error) {
+func FetchAllFoldersByParams(orgID uuid.UUID, status string) ([]*Folder, error) {
 	var folders []*Folder
 	var err error
 
-	if dataSet == nil {
-		// Fetch folders from sample file
-		folders, err = GetJSONData("sample.json")
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		folders = dataSet
+	// Parse JSON data from sample.json
+	folders, err = GetJSONData("sample.json")
+	if err != nil {
+		return nil, err
 	}
 
 	// Iterate over all folders and append folders with specified OrgID to resFolders
 	resFolders := []*Folder{}
-	for _, folder := range folders {
-		if folder.OrgId == orgID {
-			resFolders = append(resFolders, folder)
+
+	count := 1
+
+	// Different conditionals for status being searched for
+	// Switch-case outside of for loop to conserve processing
+	switch status {
+	case "existing":
+		for _, folder := range folders {
+			// Get folders with any or specified OrgID that has not been deleted
+			if (orgID == uuid.Nil || folder.OrgId == orgID) && !folder.Deleted {
+				folder.Number = count
+				resFolders = append(resFolders, folder)
+				count++
+			}
+		}
+	case "deleted":
+		for _, folder := range folders {
+			// Get folders with any or specified OrgID that has been deleted
+			if (orgID == uuid.Nil || folder.OrgId == orgID) && folder.Deleted {
+				folder.Number = count
+				resFolders = append(resFolders, folder)
+				count++
+			}
+		}
+	default:
+		for _, folder := range folders {
+			// Get folders with any or specified OrgID (any status)
+			if orgID == uuid.Nil || folder.OrgId == orgID {
+				folder.Number = count
+				resFolders = append(resFolders, folder)
+				count++
+			}
 		}
 	}
 

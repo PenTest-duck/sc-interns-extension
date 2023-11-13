@@ -2,7 +2,7 @@ package folders
 
 import "math"
 
-func GetPage(folders *FetchFolderResponse, currentPage int, pageSize int) *PaginatedFetchFolderResponse {
+func GetPage(folders []*Folder, currentPage int, pageSize int) *PaginatedFetchFolderResponse {
 
 	var previousPage int
 	var nextPage int
@@ -12,8 +12,15 @@ func GetPage(folders *FetchFolderResponse, currentPage int, pageSize int) *Pagin
 	paginatedFolders := []*Folder{}
 
 	// Get number of folders and number of pages (totalCount ceiling divided by pageSize)
-	totalCount := folders.Count
+	totalCount := len(folders)
 	lastPage := int(math.Ceil(float64(totalCount) / float64(pageSize)))
+
+	// Ensure current page is within bounds
+	if currentPage < 1 {
+		currentPage = 1
+	} else if currentPage > lastPage {
+		currentPage = lastPage
+	}
 
 	// Ensure currentPage is within range
 	if 1 <= currentPage && currentPage <= lastPage {
@@ -24,11 +31,11 @@ func GetPage(folders *FetchFolderResponse, currentPage int, pageSize int) *Pagin
 		// If on last page, fetch from startIndex to the end of slice
 		// This prevents null padding in returned folders slice
 		if currentPage == lastPage {
-			paginatedFolders = folders.Folders[startIndex:]
+			paginatedFolders = folders[startIndex:]
 		} else {
 			// If not on last page, fetch page from startIndex to endIndex
 			endIndex := pageSize * currentPage
-			paginatedFolders = folders.Folders[startIndex:endIndex]
+			paginatedFolders = folders[startIndex:endIndex]
 		}
 
 		// Set previous and next page

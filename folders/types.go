@@ -2,14 +2,12 @@ package folders
 
 import "github.com/gofrs/uuid"
 
-// EDITED: also allows for dataset other than sample.json to be supplied + arbitrary page size
 type FetchFolderRequest struct {
 	OrgID    uuid.UUID
-	DataSet  []*Folder
+	Status   string
 	PageSize int
 }
 
-// EDITED: also contains number of folders returned (for added functionality)
 type FetchFolderResponse struct {
 	Folders []*Folder
 	Count   int
@@ -18,7 +16,7 @@ type FetchFolderResponse struct {
 // ADDED: returns folders within the page and tokens to other pages
 // Token is 0 if there are no more pages in the direction (previous/next)
 type PaginatedFetchFolderResponse struct {
-	Folders      []*Folder
+	Params       *FetchFolderRequest
 	TotalCount   int
 	PageSize     int
 	CurrentPage  int
@@ -26,4 +24,6 @@ type PaginatedFetchFolderResponse struct {
 	NextPage     int
 	FirstPage    int
 	LastPage     int
+	Folders      []*Folder
+	NilUUID      uuid.UUID // Pass to template to check for empty OrgID search
 }
